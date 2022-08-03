@@ -42,23 +42,23 @@
 		<p>{{ errMsg }}</p>
 	</form>
 
-	<table>
-		<tr>
-			<th>id</th>
-			<th>name</th>
-			<th>netto</th>
-			<th>brutto</th>
-			<th>quantity</th>
-			<th>remove</th>
+	<table class="table">
+		<tr class="table_row">
+			<th class="table_header">id</th>
+			<th class="table_header">name</th>
+			<th class="table_header">netto</th>
+			<th class="table_header">brutto</th>
+			<th class="table_header">quantity</th>
+			<th class="table_header">remove</th>
 		</tr>
 		<template v-for="(datum, index) in data" v-bind:key="index">
-			<tr v-if="(index >= (perPage*(page-1))) && (index <= perPage*page-1) && datum != undefined">
-				<td>{{datum.id}}</td>
-				<td>{{datum.name}}</td>
-				<td>{{datum.netto}}</td>
-				<td>{{datum.brutto}}</td>
-				<td>{{datum.quantity}}</td>
-				<td><button @click="onRecordRemove(index)">X</button></td>
+			<tr class="table_row" v-if="(index >= (perPage*(page-1))) && (index <= perPage*page-1) && datum != undefined">
+				<td class="table_cell">{{datum.id}}</td>
+				<td class="table_cell">{{datum.name}}</td>
+				<td class="table_cell">{{datum.netto}}</td>
+				<td class="table_cell">{{datum.brutto}}</td>
+				<td class="table_cell">{{datum.quantity}}</td>
+				<td class="table_cell"><button @click="onRecordRemove(index)">X</button></td>
 			</tr>
 		</template>
 	</table>
@@ -73,7 +73,7 @@
 			return {
 				data: [],
 				page: 1,
-				perPage: 25,
+				perPage: 20,
 				isLeftPagOn: false,
 				isRightPagOn: false,
 				errMsg: '',
@@ -175,4 +175,16 @@
 </script>
 
 <style scoped>
+	.table {
+		border-collapse: collapse;
+	}
+
+	.table_row:nth-child(even) {
+		background-color: #ddd;
+	}
+
+	.table_cell {
+		padding: 0.5rem 1.5rem;
+		text-align: center;
+	}
 </style>
