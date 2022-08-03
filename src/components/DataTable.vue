@@ -1,33 +1,32 @@
 <template>
   <button @click="fetchData">Get Data</button>
 
-	<form @submit="sortData">
+	<div>
 		<label for='sort'>sort by</label>
-		<select name="sort" id="sort">
+		<select name="sort" id="sort" v-model="sortProp" @change="onFormChange($event)">
 			<option value="id">id</option>
 			<option value="name">name</option>
 			<option value="netto">netto</option>
 			<option value="brutto">brutto</option>
 			<option value="quantity">quantity</option>
 		</select>
-		<select name="sort_dir" id="sort_dir">
+		<select name="sortDir" id="sortDir" v-model="sortDirProp" @change="onFormChange($event)">
 			<option value="asc">ascending</option>
 			<option value="desc">descending</option>
 		</select>
-		<button type="submit">sort</button>
-	</form>
+	</div>
 
 
 	<div>
 		Current page: 
-		<button @click="addPage(1)" :disabled="isLeftPagDisabled">&lt;&lt;</button>
+		<button @click="changePage(1)" :disabled="!isLeftPagOn">&lt;</button>
 		{{ page }}
-		<button @click="addPage(-1)" :disabled="isRightPagDisabled">&gt;&gt;</button>
+		<button @click="changePage(-1)" :disabled="!isRightPagOn">&gt;</button>
 	</div>
 
 	<form @submit="onNewRecordAdd">
 		<label for="name">Name:</label>
-		<input type="text" id="name" name="name" />
+		<input type="text" id="name" name="name" v-model="name" />
 
 		<label for="netto">Netto:</label>
 		$<input type="number" id="netto" name="netto" />
@@ -42,8 +41,6 @@
 
 		<p>{{ errMsg }}</p>
 	</form>
-
-	<button @click="onRecordRemove(4)">remove</button>
 
 	<table>
 		<tr>
@@ -77,9 +74,12 @@
 				data: [],
 				page: 1,
 				perPage: 25,
-				isLeftPagDisabled: true,
-				isRightPagDisabled: false,
-				errMsg: ''
+				isLeftPagOn: false,
+				isRightPagOn: false,
+				errMsg: '',
+				sortProp: 'id',
+				sortDirProp: 'asc',
+				name: ''
 			}
 		},
 		methods: {
@@ -88,14 +88,12 @@
 				axios.get('http://localhost:3000/data').then(res => {
 					console.log(res.data)
 					this.data = res.data
+					this.disablePags()
 				}).catch(err => {
 					console.error(err)
 				})
 			},
-			sortData: function(e) {
-				const sort_by = e.target.sort.value
-				const sort_dir = e.target.sort_dir.value
-
+			sortData: function(sort_by, sort_dir) {
 				if(sort_dir === 'asc') {
 					this.data = this.data.sort((a,b) => {
 						if(a[sort_by] > b[sort_by]) {
@@ -114,23 +112,20 @@
 					})
 				}
 
-				e.preventDefault()
+				const filtered = this.data.filter(datum => datum != undefined)
+				this.data = filtered
+				this.disablePags()
 			},
-			addPage: function (value) {
+			changePage: function (value) {
 				this.page -= value
 				this.disablePags()
 			},
 			disablePags() {
-				if(this.page ==  1) {
-					this.isLeftPagDisabled = true
-					this.isRightPagDisabled = false
-				} else if(this.page >= this.data.length / this.perPage) {
-					this.isLeftPagDisabled = false
-					this.isRightPagDisabled = true
-				} else {
-					this.isLeftPagDisabled = false
-					this.isRightPagDisabled = false
-				}
+				if(this.page ==  1) this.isLeftPagOn = false
+				else this.isLeftPagOn = true
+
+				if(this.page >= this.data.length / this.perPage) this.isRightPagOn = false
+				else this.isRightPagOn = true
 			},
 			onNewRecordAdd: function (e) {
 				const name = e.target.name.value
@@ -160,14 +155,21 @@
 					}})
 				}
 
+				this.disablePags()
+
 				e.preventDefault()
 			},
 			onRecordRemove(index) {
 				const updatedData = this.data
-
 				delete updatedData[index]
 				this.data = updatedData
-			}
+				this.sortData(this.sortProp, this.sortDirProp)
+			},
+			onFormChange(event) {
+        console.log('working')
+				console.log(event.target.value)
+				this.sortData(this.sortProp, this.sortDirProp)
+      }
 		}	
 	}
 </script>
