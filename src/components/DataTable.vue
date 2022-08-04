@@ -1,55 +1,36 @@
 <template>
-  <button @click="fetchData">Get Data</button>
-
-	<div>
-		<label for='sort'>sort by</label>
-		<select name="sort" id="sort" v-model="sortProp" @change="onFormChange($event)">
-			<option value="id">id</option>
-			<option value="name">name</option>
-			<option value="netto">netto</option>
-			<option value="brutto">brutto</option>
-			<option value="quantity">quantity</option>
-		</select>
-		<select name="sortDir" id="sortDir" v-model="sortDirProp" @change="onFormChange($event)">
-			<option value="asc">ascending</option>
-			<option value="desc">descending</option>
-		</select>
+	<div class="table-header m-3">
+		<form @submit="onNewRecordAdd" class="form">
+			<label for="name">Name:</label>
+			<input type="text" id="name" name="name" v-model="name" />
+	
+			<label for="netto">Netto:</label>
+			<div>$<input type="number" id="netto" name="netto" /></div>
+	
+			<label for="brutto">Brutto:</label>
+			<div>$<input type="number" id="brutto" name="brutto" /></div>
+	
+			<label for="quantity">Quantity:</label>
+			<input type="number" id="quantity" name="quantity" />
+	
+			<input class='btn btn-success m-3' type="submit" value="Add" />
+	
+			<p class="m-0">{{ errMsg }}</p>
+		</form>
+	
+		<div class="get-data">
+			<button class="btn btn-primary m-3 p-2" @click="fetchData">Get Data</button>
+		</div>
 	</div>
-
-
-	<div>
-		Current page: 
-		<button @click="changePage(1)" :disabled="!isLeftPagOn">&lt;</button>
-		{{ page }}
-		<button @click="changePage(-1)" :disabled="!isRightPagOn">&gt;</button>
-	</div>
-
-	<form @submit="onNewRecordAdd">
-		<label for="name">Name:</label>
-		<input type="text" id="name" name="name" v-model="name" />
-
-		<label for="netto">Netto:</label>
-		$<input type="number" id="netto" name="netto" />
-
-		<label for="brutto">Brutto:</label>
-		$<input type="number" id="brutto" name="brutto" />
-
-		<label for="quantity">Quantity:</label>
-		<input type="number" id="quantity" name="quantity" />
-
-		<input type="submit" value="Add" />
-
-		<p>{{ errMsg }}</p>
-	</form>
 
 	<table class="table">
 		<tr class="table_row">
-			<th class="table_header">id</th>
-			<th class="table_header">name</th>
-			<th class="table_header">netto</th>
-			<th class="table_header">brutto</th>
-			<th class="table_header">quantity</th>
-			<th class="table_header">remove</th>
+			<th style="width: 10%" class="table_header">id</th>
+			<th style="width: 15%" class="table_header">name</th>
+			<th style="width: 15%" class="table_header">netto</th>
+			<th style="width: 15%" class="table_header">brutto</th>
+			<th style="width: 15%" class="table_header">quantity</th>
+			<th style="width: 30%" class="table_header">remove</th>
 		</tr>
 		<template v-for="(datum, index) in data" v-bind:key="index">
 			<tr class="table_row" v-if="(index >= (perPage*(page-1))) && (index <= perPage*page-1) && datum != undefined">
@@ -58,10 +39,39 @@
 				<td class="table_cell">{{datum.netto}}</td>
 				<td class="table_cell">{{datum.brutto}}</td>
 				<td class="table_cell">{{datum.quantity}}</td>
-				<td class="table_cell"><button @click="onRecordRemove(index)">X</button></td>
+				<td class="table_cell">
+					<div class="remove-record-form">
+						<div class="cancel-button" @click="onRecordPreremove(index)"><i class="fa-solid fa-xmark" ></i></div>
+						<button :class="{hidden: deleteConfirm[index]}" class="btn btn-danger" @click="onRecordRemove(index)">Confirm</button>
+					</div>
+				</td>
 			</tr>
 		</template>
 	</table>
+
+	<div class="table-navigation">
+		<div class="table-navigation-sort">
+			<label for='sort'>sort by</label>
+			<select name="sort" id="sort" v-model="sortProp" @change="onFormChange($event)">
+				<option value="id">id</option>
+				<option value="name">name</option>
+				<option value="netto">netto</option>
+				<option value="brutto">brutto</option>
+				<option value="quantity">quantity</option>
+			</select>
+			<select name="sortDir" id="sortDir" v-model="sortDirProp" @change="onFormChange($event)">
+				<option value="asc">ascending</option>
+				<option value="desc">descending</option>
+			</select>
+		</div>
+	
+		<div class="table-navigation-currentpage">
+			Current page: 
+			<button @click="changePage(1)" :disabled="!isLeftPagOn">&lt;</button>
+			{{ page }}
+			<button @click="changePage(-1)" :disabled="!isRightPagOn">&gt;</button>
+		</div>
+	</div>
 </template>
 
 <script>
@@ -73,13 +83,14 @@
 			return {
 				data: [],
 				page: 1,
-				perPage: 20,
+				perPage: 25,
 				isLeftPagOn: false,
 				isRightPagOn: false,
 				errMsg: '',
 				sortProp: 'id',
 				sortDirProp: 'asc',
-				name: ''
+				name: '',
+				deleteConfirm: []
 			}
 		},
 		methods: {
@@ -89,11 +100,15 @@
 					console.log(res.data)
 					this.data = res.data
 					this.disablePags()
+					this.sortData()
 				}).catch(err => {
 					console.error(err)
 				})
 			},
-			sortData: function(sort_by, sort_dir) {
+			sortData: function() {
+				const sort_by = this.sortProp
+				const sort_dir = this.sortDirProp
+				
 				if(sort_dir === 'asc') {
 					this.data = this.data.sort((a,b) => {
 						if(a[sort_by] > b[sort_by]) {
@@ -114,6 +129,7 @@
 
 				const filtered = this.data.filter(datum => datum != undefined)
 				this.data = filtered
+				this.data.map((datum, index) => this.deleteConfirm[index] = true)
 				this.disablePags()
 			},
 			changePage: function (value) {
@@ -141,7 +157,7 @@
 					netto === "" ||
 					quantity === ""
 				) {
-					this.errMsg = 'At least one of the values is empty'
+					this.errMsg = 'Values can\'t be empty!'
 				}
 
 				if(this.errMsg === '') {
@@ -156,6 +172,7 @@
 				}
 
 				this.disablePags()
+				this.sortData()
 
 				e.preventDefault()
 			},
@@ -163,28 +180,99 @@
 				const updatedData = this.data
 				delete updatedData[index]
 				this.data = updatedData
-				this.sortData(this.sortProp, this.sortDirProp)
+				this.sortData()
+
+				index.preventDefault()
 			},
 			onFormChange(event) {
         console.log('working')
 				console.log(event.target.value)
-				this.sortData(this.sortProp, this.sortDirProp)
-      }
+				this.sortData()
+      },
+			onRecordRemoveSubmit(event) {
+				event.preventDefault()
+			},
+			onRecordPreremove(index) {
+				this.deleteConfirm[index] = !this.deleteConfirm[index];
+			}
 		}	
 	}
 </script>
 
 <style scoped>
 	.table {
-		border-collapse: collapse;
+		margin: 0 auto;
+		width: 40%;
+		border-collapse: 	collapse;
 	}
 
-	.table_row:nth-child(even) {
-		background-color: #ddd;
+	tr:nth-child(odd) {
+		background-color: #eee
 	}
 
-	.table_cell {
-		padding: 0.5rem 1.5rem;
+	.table-navigation {
+		display: flex;
+		width: 40%;
+		margin: 0 auto;
+		padding: 1rem 0;
+		justify-content: space-around;
+	}
+
+	.table-navigation-sort > * {
+		margin: 0.2rem;
+	}
+
+	.table-header {
+		display: flex;
+		flex-direction: row;
+		justify-content: center;
+		margin: 2rem;
+	}
+
+	.table-header form {
+		display: block;
+		width: auto;
+
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+	}
+
+	.get-data {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.get-data button {
+		height: 40%;
+	} 
+
+	.cancel-button {
+		border-radius: 50%;
+		padding: 0.5rem 0.5rem;
 		text-align: center;
+	}
+
+	.cancel-button:hover {
+		background-color: #ccc;
+	}
+
+	.remove-record-form {
+		display: flex;
+		flex-direction: row;
+
+	}
+
+	.remove-record-form div {
+		padding: 0.5rem;
+	}
+
+	.remove-record-form > * {
+		margin: 0rem 0.5rem;
+	}
+
+	.hidden {
+		display: none !important;
 	}
 </style>

@@ -1,5 +1,4 @@
 <template>
-  <div>Hello World</div>
   <DataTable />
 </template>
 
