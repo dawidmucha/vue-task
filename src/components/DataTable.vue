@@ -1,31 +1,27 @@
 <template>
-	<div class="table-header m-3">
-		<form @submit="onNewRecordAdd" class="form">
-			<label for="name">Name:</label>
-			<input type="text" id="name" name="name" v-model="name" />
+		<form class="table-header" @submit="onNewRecordAdd">
+				<label style="grid-area: label1" for="name">Name:</label>
+				<input style="grid-area: input1" type="text" id="name" name="name" v-model="name" />
+		
+				<label style="grid-area: label2" for="netto">Netto:</label>
+				<span style="grid-area: dlr1">$</span>
+				<input style="grid-area: input2" type="number" id="netto" name="netto" />
+		
+				<label style="grid-area: label3;" for="brutto">Brutto:</label>
+				<span style="grid-area: dlr2">$</span>
+				<input style="grid-area: input3" type="number" id="brutto" name="brutto" />
+		
+				<label style="grid-area: label4" for="quantity">Quantity:</label>
+				<input style="grid-area: input4" type="number" id="quantity" name="quantity" />
 	
-			<label for="netto">Netto:</label>
-			<div>$<input type="number" id="netto" name="netto" /></div>
-	
-			<label for="brutto">Brutto:</label>
-			<div>$<input type="number" id="brutto" name="brutto" /></div>
-	
-			<label for="quantity">Quantity:</label>
-			<input type="number" id="quantity" name="quantity" />
+				<input style="grid-area: submit" class='btn btn-success m-3' type="submit" value="Add" />
+		
+				<div style="grid-area: error" class="m-0">{{ errMsg }}</div>
 
-			<input class='btn btn-success m-3' type="submit" value="Add" />
-	
-			<p class="m-0">{{ errMsg }}</p>
+				<button style="grid-area: button1" class="btn btn-primary m-3 p-2" @click="fetchData">Get Data</button>
+				<button style="grid-area: button2" class="btn btn-primary m-3 p-2" @click="toggleTable">{{ this.dataShow ? 'Hide table' : 'Show table'}}</button>
 		</form>
-	
-		<div class="get-data">
-			<button class="btn btn-primary m-3 p-2" @click="fetchData">Get Data</button>
-		</div>
 
-		<div class="get-data">
-			<button class="btn btn-primary m-3 p-2" @click="toggleTable">{{ this.dataShow ? 'Hide table' : 'Show table'}}</button>
-		</div>
-	</div>
 
 	<table class="table" v-if="this.dataShow">
 		<tr class="table_row">
@@ -243,10 +239,22 @@
 	}
 
 	.table-header {
-		display: flex;
-		flex-direction: row;
-		justify-content: center;
-		margin: 2rem;
+		display: grid;
+		grid-template-rows: repeat(8, 2rem) 4rem 2rem;
+		grid-template-columns: 1.5rem 1fr 6rem;
+		grid-template-areas: 
+			".    label1 button1"
+			".    input1 button1"
+			".    label2 button1"
+			"dlr1 input2 button1"
+			".    label3 button2"
+			"dlr2 input3 button2"
+			".    label4 button2"
+			".    input4 button2"
+			"submit submit submit"
+			"error error error";
+		margin: 0 auto;
+		width: 25%;
 	}
 
 	.table-header form {
