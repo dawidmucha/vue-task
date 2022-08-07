@@ -91,7 +91,8 @@
 				sortProp: 'id',
 				sortDirProp: 'asc',
 				name: '',
-				deleteConfirm: []
+				deleteConfirm: [],
+				dataShow: false,
 			}
 		},
 		created() {
@@ -167,6 +168,14 @@
 					quantity === ""
 				) {
 					this.errMsg = 'Values can\'t be empty!'
+				}
+
+				if(
+					brutto < 0 ||
+					netto < 0 ||
+					quantity < 0
+				) {
+					this.errMsg = 'Values can\'t be negative!'
 				}
 
 				if(this.errMsg === '') {
