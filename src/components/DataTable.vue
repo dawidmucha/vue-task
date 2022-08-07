@@ -178,13 +178,15 @@
 					this.errMsg = 'Values can\'t be negative!'
 				}
 
+				if(quantity === "0") this.errMsg = 'Quantity cannot be equal to zero!'
+
 				if(this.errMsg === '') {
 					const updatedData = this.data
 					Object.assign(updatedData, {[this.data.length]: {
 						id: this.data.length + 1,
 						name,
-						brutto,
-						netto,
+						brutto: "$" + brutto,
+						netto: "$" + netto,
 						quantity,
 					}})
 				}
@@ -241,7 +243,7 @@
 	.table-header {
 		display: grid;
 		grid-template-rows: repeat(8, 2rem) 4rem 2rem;
-		grid-template-columns: 1.5rem 1fr 6rem;
+		grid-template-columns: 0.7rem 1fr 6rem;
 		grid-template-areas: 
 			".    label1 button1"
 			".    input1 button1"
