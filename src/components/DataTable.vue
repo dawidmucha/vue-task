@@ -21,9 +21,13 @@
 		<div class="get-data">
 			<button class="btn btn-primary m-3 p-2" @click="fetchData">Get Data</button>
 		</div>
+
+		<div class="get-data">
+			<button class="btn btn-primary m-3 p-2" @click="toggleTable">{{ this.dataShow ? 'Hide table' : 'Show table'}}</button>
+		</div>
 	</div>
 
-	<table class="table">
+	<table class="table" v-if="this.dataShow">
 		<tr class="table_row">
 			<th style="width: 10%" class="table_header">id</th>
 			<th style="width: 15%" class="table_header">name</th>
@@ -49,7 +53,7 @@
 		</template>
 	</table>
 
-	<div class="table-navigation">
+	<div class="table-navigation" v-if="this.dataShow">
 		<div class="table-navigation-sort">
 			<label for='sort'>sort by</label>
 			<select name="sort" id="sort" v-model="sortProp" @change="onFormChange($event)">
@@ -207,6 +211,9 @@
       },
 			onRecordPreremove(index) {
 				this.deleteConfirm[index] = !this.deleteConfirm[index];
+			},
+			toggleTable() {
+				this.dataShow = !this.dataShow
 			}
 		}	
 	}
