@@ -12,7 +12,7 @@
 	
 			<label for="quantity">Quantity:</label>
 			<input type="number" id="quantity" name="quantity" />
-	
+
 			<input class='btn btn-success m-3' type="submit" value="Add" />
 	
 			<p class="m-0">{{ errMsg }}</p>
@@ -76,6 +76,7 @@
 
 <script>
 	import axios from 'axios'
+	import { getDatabase, set, ref, onValue } from 'firebase/database'
 
 	export default {
 		name: "DataTable",
@@ -93,11 +94,15 @@
 				deleteConfirm: []
 			}
 		},
+		created() {
+			onValue(ref(getDatabase(), '/data'), (snapshot) => {
+				this.data = snapshot.val()
+				this.data.map((datum, index) => this.deleteConfirm[index] = true)
+			})
+		},
 		methods: {
 			fetchData: function () {
-				console.log('test')
 				axios.get('http://localhost:3000/data').then(res => {
-					console.log(res.data)
 					this.data = res.data
 					this.disablePags()
 					this.sortData()
@@ -131,6 +136,10 @@
 				this.data = filtered
 				this.data.map((datum, index) => this.deleteConfirm[index] = true)
 				this.disablePags()
+
+				// write to database
+				console.log('updating database with', this.data)
+				set(ref(getDatabase(), 'data/'), this.data)
 			},
 			changePage: function (value) {
 				this.page -= value
@@ -184,14 +193,9 @@
 
 				index.preventDefault()
 			},
-			onFormChange(event) {
-        console.log('working')
-				console.log(event.target.value)
+			onFormChange() {
 				this.sortData()
       },
-			onRecordRemoveSubmit(event) {
-				event.preventDefault()
-			},
 			onRecordPreremove(index) {
 				this.deleteConfirm[index] = !this.deleteConfirm[index];
 			}
