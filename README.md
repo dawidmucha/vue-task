@@ -5,6 +5,11 @@
 npm install
 ```
 
+## API setup for "Get Data" button
+```
+json-server --watch MOCK_DATA.json
+```
+
 ### Compiles and hot-reloads for development
 ```
 npm run serve

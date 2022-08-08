@@ -1,4 +1,4 @@
-<template>
+<template data-text="dataTable">
 		<form class="table-header" @submit="onNewRecordAdd">
 				<label style="grid-area: label1" for="name">Name:</label>
 				<input style="grid-area: input1" type="text" id="name" name="name" v-model="name" />
@@ -14,16 +14,17 @@
 				<label style="grid-area: label4" for="quantity">Quantity:</label>
 				<input style="grid-area: input4" type="number" id="quantity" name="quantity" />
 	
-				<input style="grid-area: submit" class='btn btn-success m-3' type="submit" value="Add" />
+				<input style="grid-area: submit" class='btn btn-success m-2 p-1' type="submit" value="Add" />
 		
 				<div style="grid-area: error" class="m-0">{{ errMsg }}</div>
 
-				<button style="grid-area: button1" class="btn btn-primary m-3 p-2" @click="fetchData">Get Data</button>
-				<button style="grid-area: button2" class="btn btn-primary m-3 p-2" @click="toggleTable">{{ this.dataShow ? 'Hide table' : 'Show table'}}</button>
+				<button style="grid-area: button1" class="btn btn-primary m-2 p-1" @click="fetchData" type="button">Get Data</button>
+				<button style="grid-area: button2" class="btn btn-primary m-2 p-1" @click="toggleTable" type="button">{{ this.dataShow ? 'Hide table' : 'Show table'}}</button>
+				<button style="grid-area: button3" class="btn btn-danger m-2 p-1" @click="clearData" type="button">Clear data</button>
 		</form>
 
 
-	<table class="table" v-if="this.dataShow">
+	<table class="table" v-if="this.dataShow" data-text="dataTable_table">
 		<tr class="table_row">
 			<th style="width: 10%" class="table_header">id</th>
 			<th style="width: 15%" class="table_header">name</th>
@@ -212,6 +213,10 @@
 			},
 			toggleTable() {
 				this.dataShow = !this.dataShow
+			},
+			clearData() {
+				this.data = []
+				this.sortData()
 			}
 		}	
 	}
@@ -252,8 +257,8 @@
 			".    label3 button2"
 			"dlr2 input3 button2"
 			".    label4 button2"
-			".    input4 button2"
-			"submit submit submit"
+			".    input4 button3"
+			".    submit button3"
 			"error error error";
 		margin: 0 auto;
 		width: 25%;
